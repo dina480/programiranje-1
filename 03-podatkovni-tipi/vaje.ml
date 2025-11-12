@@ -19,15 +19,15 @@
  Namig: Občudujte informativnost tipov funkcij.
 [*----------------------------------------------------------------------------*)
 
-type euro 
+type euro = Euro of float 
 
-type dollar 
+type dollar = Dollar of float
 
-let dollar_to_euro _ = ()
+let dollar_to_euro (Dollar dollar) = Euro (dollar *. 0.86)
 
-let euro_to_dollar _ = ()
+let euro_to_dollar (Euro euro) = Dollar (euro *. 1.5)
 
-(* let primer_valute_1 = dollar_to_euro (Dollar 0.5) *)
+let primer_valute_1 = dollar_to_euro (Dollar 0.5)
 (* val primer_valute_1 : euro = Euro 0.4305 *)
 
 (*----------------------------------------------------------------------------*
@@ -39,9 +39,16 @@ let euro_to_dollar _ = ()
  Ocaml sam opozori, da je potrebno popraviti funkcijo `to_pound`.
 [*----------------------------------------------------------------------------*)
 
-type currency 
+type currency =
+| Yen of float
+| Pound of float
+| Krona of float
 
-let to_pound _ = ()
+let to_pound x = 
+  match x with
+  | Yen y -> Pound (y *. 0.007)
+  | Pound p -> Pound p 
+  | Krona k -> Pound (k *. 0.08)
 
 (* let primer_valute_2 = to_pound (Yen 100.) *)
 (* val primer_valute_2 : currency = Pound 0.700000000000000067 *)
@@ -58,7 +65,9 @@ let to_pound _ = ()
  `Nil`(oz. `[]` v Ocamlu) in pa konstruktorjem za člen `Cons(x, xs)` (oz. `x ::
  xs` v Ocamlu).
 [*----------------------------------------------------------------------------*)
-
+type  seznam =
+| Nil
+| Element of int * seznam 
 (*----------------------------------------------------------------------------*
  Definirajte tip `intbool_list` z konstruktorji za:
 
@@ -69,9 +78,12 @@ let to_pound _ = ()
  Nato napišite testni primer, ki bi predstavljal `[5; true; false; 7]`.
 [*----------------------------------------------------------------------------*)
 
-type intbool_list 
+type intbool_list =
+| Nil
+| Bool of bool * intbool_list
+| Int of int * intbool_list
 
-let test = ()
+let test = Int (5, Bool(true, Bool (false, Int(7, Nil))))
 
 (*----------------------------------------------------------------------------*
  Funkcija `intbool_map f_int f_bool ib_list` preslika vrednosti `ib_list` v nov
@@ -79,14 +91,25 @@ let test = ()
  oz. `f_bool`.
 [*----------------------------------------------------------------------------*)
 
-let rec intbool_map _ _ _ = ()
-
+let rec intbool_map f_int f_bool ib_list = 
+  match ib_list with
+  | Nil -> Nil
+  | Int (x, ib_list') -> Int(f_int x, intbool_map f_int f_bool ib_list')
+  | Bool (b, ib_list') -> Bool(f_bool b, intbool_map f_int f_bool ib_list')
 (*----------------------------------------------------------------------------*
  Funkcija `intbool_reverse` obrne vrstni red elementov `intbool_list` seznama.
  Funkcija je repno rekurzivna.
 [*----------------------------------------------------------------------------*)
 
-let rec intbool_reverse _ = ()
+let rec intbool_reverse ib_list =
+  let rec pomozna acc ib_list' =
+  match ib_list' with
+    | Nil -> acc
+    | Int (i, ibs) -> pomozna (Int (i, acc)) (ibs)
+    | Bool (b, ibs) -> pomozna (Bool (b, acc)) (ibs)
+  in
+  pomozna Nil ib_list
+
 
 (*----------------------------------------------------------------------------*
  Funkcija `intbool_separate ib_list` loči vrednosti `ib_list` v par `list`
@@ -94,7 +117,23 @@ let rec intbool_reverse _ = ()
  vrednosti. Funkcija je repno rekurzivna in ohranja vrstni red elementov.
 [*----------------------------------------------------------------------------*)
 
-let rec intbool_separate _ = ()
+let rec intbool_separate ib_list =
+  let rec pomozna int_acc bool_acc ib_list = 
+    match ib_list with
+    | Nil -> (List.rev int_acc, List.rev bool_acc)
+    | Int (i, ibs) -> pomozna (i :: int_acc) bool_acc ibs
+    | Bool (b, ibs) -> pomozna int_acc (b :: bool_acc) ibs
+  in
+  pomozna [] [] ib_list
+
+  let rec intbool_separate2 ib_list =
+  let rec pomozna int_acc bool_acc ib_list = 
+    match ib_list with
+    | Nil -> (int_acc, bool_acc)
+    | Int (i, ibs) -> pomozna (i :: int_acc) bool_acc ibs
+    | Bool (b, ibs) -> pomozna int_acc (b :: bool_acc) ibs
+  in
+  pomozna [] [] (intbool_reverse ib_list)
 
 (*----------------------------------------------------------------------------*
  ## Čarodeji
@@ -112,7 +151,10 @@ let rec intbool_separate _ = ()
  tip `specialisation`, ki loči med temi zaposlitvami.
 [*----------------------------------------------------------------------------*)
 
-type magic 
+type magic =
+| Fire
+| Frost
+| Arcane
 
 type specialisation 
 
@@ -145,9 +187,20 @@ let jaina  = ()
  nov števec s posodobljenim poljem glede na vrednost `magic`.
 [*----------------------------------------------------------------------------*)
 
-type magic_counter 
+type magic_counter = {fire: int; frost: int; arcane: int}
 
-let update _ _ = ()
+(*let update {fire = fi; frost = fr; arcane = ar} magic =
+  (*ali:   let {fire = fi; frost = fr; arcane = ar} = counter in *)
+  match magic with
+  | Fire -> {fire = fi +1; frost = fr; arcane = ar}
+  | Frost -> {fire = fi +1; frost = fr; arcane = ar}
+  | Arcane -> {fire = fi +1; frost = fr; arcane = ar}*)
+
+  let update counter magic =
+    match magic with
+    | Fire -> {counter with fire = counter.fire + 1}
+    | Frost -> {counter with frost = counter.frost + 1}
+    | Arcane -> {counter with arcane = counter.arcane + 1}
 
 (* let primer_carovniki_1 = update {fire = 1; frost = 1; arcane = 1} Arcane *)
 (* val primer_carovniki_1 : magic_counter = {fire = 1; frost = 1; arcane = 2} *)

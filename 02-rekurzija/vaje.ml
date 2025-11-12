@@ -1,7 +1,12 @@
 (*----------------------------------------------------------------------------*
  # Rekurzija
 [*----------------------------------------------------------------------------*)
-
+let rec app l1 l2 =
+  match l1 with
+  | [] -> l2
+  | x::xs -> (
+    x :: (app xs l2)
+  )
 (*----------------------------------------------------------------------------*
  Napišite spodaj opisane funkcije, ne da bi uporabljali funkcije iz standardne
  knjižnice. Kjer to kažejo primeri, napišite tudi repno rekurzivne različice z
@@ -17,7 +22,10 @@
  rekurzivna.
 [*----------------------------------------------------------------------------*)
 
-let reverse _ = ()
+let rec reverse l1 =
+  match l1 with
+  | [] -> l1
+  | x :: xs -> app (reverse xs) [x] 
 
 (*----------------------------------------------------------------------------*
  ## Funkcija `repeat`
@@ -28,7 +36,11 @@ let reverse _ = ()
   vrednosti `n` funkcija vrne prazen seznam.
 [*----------------------------------------------------------------------------*)
 
-let rec repeat _ _ = ()
+let rec repeat x n =
+  if n <= 0  then
+    []
+  else
+    x :: (repeat x (n-1))
 
 let primer_repeat_1 = repeat "A" 5
 (* val primer_repeat_1 : string list = ["A"; "A"; "A"; "A"; "A"] *)
@@ -47,7 +59,14 @@ let primer_repeat_2 = repeat "A" (-2)
  funkcije `List.init`.
 [*----------------------------------------------------------------------------*)
 
-let range _ = ()
+let range n = 
+  let rec aux n acc =
+    if n < 0 then acc
+    else
+      aux (n-1) (n :: acc)
+    in
+    aux n []
+
 
 let primer_range = range 10
 (* val primer_range : int list = [0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10] *)
@@ -62,7 +81,10 @@ let primer_range = range 10
  ...`. Pri tem ne smete uporabiti vgrajene funkcije `List.map`.
 [*----------------------------------------------------------------------------*)
 
-let rec map _ _ = ()
+let rec map sez f =
+  match sez with
+  | [] -> []
+  | x :: xs -> f x :: map xs f  
 
 let primer_map_1 =
   let plus_two = (+) 2 in
@@ -74,7 +96,10 @@ let primer_map_1 =
  `map`.
 [*----------------------------------------------------------------------------*)
 
-let map_tlrec _ _ = ()
+let rec map_tlrec sez f =
+  match sez with
+  | [] -> []
+  | 
 
 let primer_map_2 =
   let plus_two = (+) 2 in
